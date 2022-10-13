@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 typedef struct aux
 {
     float value;
     struct aux *next;
-} No;
+} Node;
 
 float operate(float a, float b, char operator)
 {
@@ -30,69 +31,73 @@ float operate(float a, float b, char operator)
     }
 }
 
-No *insert_in_stack(float num, No *list)
+Node *insert_in_stack(float num, Node *stack)
 {
-    No *new = malloc(sizeof(No));
+    Node *new_node = malloc(sizeof(Node));
 
-    if (new)
-    {
-        new->value = num;
-        new->next = list;
-
-        return new;
-    }
-    else
+    if (new_node == NULL)
     {
         printf("Erro ao alocar memória!");
-    }
-    return NULL;
-}
-
-No *remove_from_stack(No **list)
-{
-    No *remove = NULL;
-
-    if (*list)
-    {
-        remove = *list;
-        *list = remove->next;
+        return NULL;
     }
     else
     {
-        printf("Expressão inválida");
+        new_node->value = num;
+        new_node->next = stack;
+
+        return new_node;
     }
-    return remove;
+}
+
+// Se o nó retornado for NULL: interprte como erro
+Node *remove_from_stack(Node **list)
+{
+    Node *last_node = NULL;
+
+    if (*list == NULL)
+    {
+        printf("Erro: expressão inválida");
+        return NULL;
+    }
+    else
+    {
+        last_node = *list;
+        *list = last_node->next;
+
+        return last_node;
+    }
 }
 
 float solve_expression(char expression[])
 {
-    char *element;
+    char *elements;
     float result;
-    No *n1, *n2;
-    No *list = NULL;
-    element = strtok(expression, " ");
+    Node *n1, *n2;
+    Node *stack = NULL;
+    elements = strtok(expression, " ");
 
     // pointer[0] é um operador
 
-    while (element != NULL)
+    while (elements != NULL)
     {
-        if (element[0] == '+' || element[0] == '-' || element[0] == '*' || element[0] == '/')
+        bool element_is_operator = elements[0] == '+' || elements[0] == '-' || elements[0] == '*' || elements[0] == '/';
+        if (element_is_operator)
         {
-            n1 = remove_from_stack(&list);
-            n2 = remove_from_stack(&list);
-            result = operate(n2->value, n1->value, element[0]);
-            list = insert_in_stack(result, list);
+            n1 = remove_from_stack(&stack);
+            n2 = remove_from_stack(&stack);
+            result = operate(n2->value, n1->value, elements[0]);
+            stack = insert_in_stack(result, stack);
             free(n1);
             free(n2);
         }
         else
         {
-            result = strtol(element, NULL, 10); // string to long
-            list = insert_in_stack(result, list);
+            result = strtol(elements, NULL, 10); // string to long
+            stack = insert_in_stack(result, stack);
         }
-        element = strtok(NULL, " ");
+        elements = strtok(NULL, " ");
     }
-    n1 = remove_from_stack(&list);
+    n1 = remove_from_stack(&stack);
     result = n1->value;
     free(n1);
 
