@@ -50,19 +50,19 @@ Node *insert_in_stack(float num, Node *stack)
 }
 
 // Se o nó retornado for NULL: interprte como erro
-Node *remove_from_stack(Node **list)
+Node *remove_from_stack(Node *stack)
 {
     Node *last_node = NULL;
 
-    if (*list == NULL)
+    if (stack == NULL)
     {
         printf("Erro: expressão inválida");
         return NULL;
     }
     else
     {
-        last_node = *list;
-        *list = last_node->next;
+        last_node = stack;
+        stack = last_node->next;
 
         return last_node;
     }
@@ -76,15 +76,15 @@ float solve_expression(char expression[])
     Node *stack = NULL;
     elements = strtok(expression, " ");
 
-    // pointer[0] é um operador
+    // Ajeitar os erros de ponteiros!!
 
     while (elements != NULL)
     {
         bool element_is_operator = elements[0] == '+' || elements[0] == '-' || elements[0] == '*' || elements[0] == '/';
         if (element_is_operator)
         {
-            n1 = remove_from_stack(&stack);
-            n2 = remove_from_stack(&stack);
+            n1 = remove_from_stack(stack);
+            n2 = remove_from_stack(stack);
             result = operate(n2->value, n1->value, elements[0]);
             stack = insert_in_stack(result, stack);
             free(n1);
